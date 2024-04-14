@@ -274,7 +274,7 @@ const translation = {
     "Issued": "Issued",
     "PrivacyPolicy": "Privacy policy",
     "TermsAndConditions": "Terms and conditions",
-    "RemoveFromWallet": "Remove from wallet",
+    "RemoveFromWallet": "Cüzdandan Kaldır",
     "Revoked": "Revoked",
     "CredentialRevokedMessageTitle": "This credential is revoked",
     "CredentialRevokedMessageBody": "This credential may no longer work for some proof requests. You will need to update the credential with the issuer.",
@@ -288,7 +288,7 @@ const translation = {
     "HowToGetThisCredentialBack": "How to get this credential back",
     "HowToGetThisCredentialBackListItem1": "You will have to go to the organization that issued you this credential and request it again.",
     "CredentialRemoved": "Credential removed",
-    "IssuedBy": "Issued by:",
+    "IssuedBy": "Veren Kurum:",
     "RemoveCredential": "Remove Credential",
   },
   "Home": {
@@ -446,8 +446,8 @@ const translation = {
   "Record": {
     "Hide": "Hide",
     "Show": "Show",
-    "HideAll": "Hide all",
-    "ShowAll": "Show all",
+    "HideAll": "Tümünü Gizle",
+    "ShowAll": "Tümünü Göster",
     "Hidden": "Hidden",
     "InvalidDate": "Invalid Date: "
   },

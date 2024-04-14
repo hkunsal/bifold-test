@@ -1,113 +1,183 @@
-import { CredentialState } from '@aries-framework/core'
-import { useCredentialByState } from '@aries-framework/react-hooks'
-import React from 'react'
-import { useTranslation } from 'react-i18next'
-import { useTheme } from '../../contexts/theme'
-import { View, Text, StyleSheet, Dimensions, ScrollView } from 'react-native'
-import CredentialCard from '../misc/CredentialCard'
-import EmptyWalletIcon from '../../assets/img/empty-wallet.svg' 
+import React, { useState, useRef } from 'react';
+import { View, Animated, PanResponder, Dimensions, StyleSheet, Text } from 'react-native';
+import CredentialCard from '../misc/CredentialCard';
+import { useCredentialByState } from '@aries-framework/react-hooks';
+import { CredentialState } from '@aries-framework/core';
+import { useTranslation } from 'react-i18next';
+import { useTheme } from '../../contexts/theme';
+import EmptyWalletIcon from '../../assets/img/empty-wallet.svg';
+import { borderRadius } from 'theme';
 
-const offset = 25;
+const SWIPE_THRESHOLD = 100;
+const CARD_OFFSET = 30;
+const { width: screenWidth } = Dimensions.get('window');
 
-interface HomeContentViewProps {
-  children?: any;
-}
-
-const HomeContentView: React.FC<HomeContentViewProps> = ({ children }) => {
-  const credentials = [
+const HomeContentView = () => {
+  const initialCredentials = [
     ...useCredentialByState(CredentialState.CredentialReceived),
     ...useCredentialByState(CredentialState.Done),
-  ]
-  .reverse(); // Reverse the order of credentials
+  ].reverse();
 
-  const { HomeTheme } = useTheme();
-  const { t } = useTranslation();
+  const [credentials, setCredentials] = useState(initialCredentials);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const pan = useRef(new Animated.ValueXY()).current;
 
-  const screenWidth = Dimensions.get('window').width;
-
-  const styles = StyleSheet.create({
-    container: {
-      paddingHorizontal: offset,
-      paddingBottom: offset * 3,
-    },
-    welcomeContainer: {
-      borderBottomWidth: 1,
-      borderColor: '#D3D3D3',
-    },
-    welcomeText: {
-      fontSize: 20,
-      marginBottom: 3,
-      marginLeft: 15,
-    },
-    messageContainer: {
-      backgroundColor: '#ffffff',
-      borderWidth: 1,
-      borderColor: '#D3D3D3',
-      borderRadius: 15,
-      paddingHorizontal: offset,
-      paddingVertical: offset * 3,
-      width: 370, // Set width to 370
-      alignSelf: 'center', // Center message container horizontally
-    },
-    aboveBoxText: {
-      textAlign: 'left',
-      marginBottom: 25,
-      marginLeft: 5,
-      fontWeight: "bold",
-      marginTop: 20,
-    },
-    emptyWalletContent: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingTop: 10,
-    },
-    emptyWalletIcon: {
-      width: 50,
-      height: 50,
-      marginRight: 10,
-    },
-    emptyWalletText: {
-      fontSize: 16,
-    },
-    cardSpacing: {
-      marginBottom: 15, // Add margin bottom to create separation between cards
-    },
+  const panResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onPanResponderMove: Animated.event([null, { dy: pan.y }], { useNativeDriver: false }),
+    onPanResponderRelease: (e, gesture) => {
+      if (Math.abs(gesture.dy) < SWIPE_THRESHOLD) {
+        Animated.spring(pan, {
+          toValue: { x: 0, y: 0 },
+          useNativeDriver: true
+        }).start();
+      } else {
+        Animated.spring(pan, {
+          toValue: { x: 0, y: 0 },
+          useNativeDriver: true
+        }).start(() => {
+          setCredentials(prevCredentials => {
+            const newCredentials = [...prevCredentials];
+            const movedCard = newCredentials.splice(currentIndex, 1)[0];
+            newCredentials.push(movedCard);
+            return newCredentials;
+          });
+          setCurrentIndex(prevIndex => prevIndex === 0 ? 0 : (prevIndex - 1) % credentials.length);
+        });
+      }
+    }
   });
 
+  const { t } = useTranslation();
+  const { HomeTheme } = useTheme();
+
   return (
-    <ScrollView>
-      <View style={styles.container}>
-        <View style={[styles.welcomeContainer]}>
-          <Text style={[HomeTheme.welcomeHeader, { marginTop: offset, marginBottom: 20 }]}>
-            {t('Home.Welcome')}
-          </Text>
-        </View>
+    <View style={styles.container}>
+      <View style={styles.textContainer}>
+        <Text style={[HomeTheme.welcomeHeader, styles.welcomeText]}>
+          {t('Home.Welcome')}
+        </Text>
+        <View style={styles.headerBorder}></View>
         <Text style={styles.aboveBoxText}>
           {t('Home.AddedDocuments')}
         </Text>
-        {credentials.length === 0 ? (
-          <View style={styles.messageContainer}>
-            <View style={styles.emptyWalletContent}>
-              <EmptyWalletIcon width={50} height={50} style={styles.emptyWalletIcon} />
-              <Text style={styles.emptyWalletText}>{t('Home.EmptyWalletMessage')}</Text>
-            </View>
-          </View>
-        ) : (
-          <>
-            {credentials.map((credential, index) => (
-              <View style={styles.cardSpacing} key={index}>
-                <CredentialCard
-                  credential={credential}
-                  style={styles.cardSpacing} // Apply spacing between each card
-                />
-              </View>
-            ))}
-          </>
-        )}
       </View>
-      {children}
-    </ScrollView>
+      {credentials.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <EmptyWalletIcon width={50} height={50} />
+          <Text style={styles.emptyWalletText}>{t('Home.EmptyWalletMessage')}</Text>
+        </View>
+      ) : (
+        <View {...panResponder.panHandlers} style={styles.cardContainer}>
+          {credentials.map((credential, index) => {
+  const isActive = index === currentIndex;
+  let yOffset;
+
+  if (credentials.length === 1) {
+    // Single card, allow it to respond to swiping if active
+    yOffset = -40;
+  } else if (credentials.length === 2) {
+    // Two cards: ensure correct positioning and responsiveness
+    if (index === 0) {
+      yOffset = isActive ? pan.y : -40;  // First card directly at the empty container's position
+    } else if (index === 1){
+      yOffset = isActive ? pan.y -20 : -40;  // Second card correctly positioned just below the first
+    }
+  } else {
+    // Three or more cards
+    if (index <= 2) {
+      yOffset = isActive ? pan.y : -CARD_OFFSET * (index - currentIndex);
+    } else {
+      yOffset = -CARD_OFFSET * 2; // Stack all cards beyond the third one on top of the third card
+    }
+  }
+
+            const cardStyle = {
+              transform: [{ translateY: yOffset }],
+              opacity: isActive ? 1 : 0.5,
+              zIndex: isActive ? 100 : index,
+            };
+
+            return (
+              <Animated.View
+                key={credential.id || index}
+                style={[styles.card, cardStyle]}
+              >
+                <CredentialCard credential={credential} containerWidth={screenWidth} />
+              </Animated.View>
+            );
+          })}
+        </View>
+      )}
+    </View>
   );
 };
+
+const BORDER_PADDING = 24; // Padding on each side
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  textContainer: {
+    marginTop: 20,
+    width: '100%',
+    marginBottom: 20,
+    paddingLeft: 20, // Adjust margin left
+  },
+  cardContainer: {
+    width: '100%',
+    flex: 1,
+  },
+  card: {
+    position: 'absolute',
+    width: '100%',
+    minHeight: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  welcomeText: {
+    fontSize: 20,
+    marginBottom: 24,
+    marginTop: 10,
+    textAlign: 'left', // Align text to the left
+  },
+  aboveBoxText: {
+    fontWeight: "bold",
+    marginTop: 10,
+    marginBottom: 80,
+    textAlign: 'left', // Align text to the left
+  },
+  emptyContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    width: 370,
+    height: 200,
+    borderColor: '#D3D3D3',
+    borderWidth: 1,
+    borderRadius: 10,
+    marginTop: -40,  // Adjust to align with the backmost card
+    padding: 40,
+  },
+  emptyWalletText: {
+    fontSize: 16,
+    marginLeft: 10,
+  },
+  headerBorder: {
+    height: 1,
+    width: screenWidth - 2 * BORDER_PADDING, // Adjusted width calculation
+    backgroundColor: '#D3D3D3',
+    marginBottom: 10,
+    alignSelf: 'center', // Ensures the border is centered after adjusting the width
+    marginLeft: BORDER_PADDING - 34,
+    marginRight: BORDER_PADDING - 12
+  },
+});
+
+
+
 
 export default HomeContentView;

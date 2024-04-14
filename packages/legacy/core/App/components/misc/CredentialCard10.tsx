@@ -24,6 +24,7 @@ interface CredentialCard10Props {
   credential: CredentialExchangeRecord
   onPress?: GenericFn
   style?: ViewStyle
+  containerWidth?: number
 }
 
 const paddingVertical = 10

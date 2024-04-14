@@ -1,26 +1,28 @@
-import { CredentialExchangeRecord } from '@aries-framework/core'
-import React from 'react'
-import { ViewStyle } from 'react-native'
+import { CredentialExchangeRecord } from '@aries-framework/core';
+import React from 'react';
+import { ViewStyle } from 'react-native';
 
-import { useConfiguration } from '../../contexts/configuration'
-import { useTheme } from '../../contexts/theme'
-import { GenericFn } from '../../types/fn'
-import { CardOverlayType } from '../../types/oca'
-import { Attribute, Predicate } from '../../types/record'
+import { useConfiguration } from '../../contexts/configuration';
+import { useTheme } from '../../contexts/theme';
+import { GenericFn } from '../../types/fn';
+import { CardOverlayType } from '../../types/oca';
+import { Attribute, Predicate } from '../../types/record';
 
-import CredentialCard10 from './CredentialCard10'
-import CredentialCard11 from './CredentialCard11'
+import CredentialCard10 from './CredentialCard10';
+import CredentialCard11 from './CredentialCard11';
 
 interface CredentialCardProps {
-  credential?: CredentialExchangeRecord
-  credDefId?: string
-  schemaId?: string
-  credName?: string
-  onPress?: GenericFn
-  style?: ViewStyle
-  proof?: boolean
-  displayItems?: (Attribute | Predicate)[]
-  existsInWallet?: boolean
+  credential?: CredentialExchangeRecord;
+  credDefId?: string;
+  schemaId?: string;
+  credName?: string;
+  onPress?: GenericFn;
+  style?: ViewStyle;
+  proof?: boolean;
+  displayItems?: (Attribute | Predicate)[];
+  existsInWallet?: boolean;
+  containerWidth?: number;
+  cardStyle?: ViewStyle;
 }
 
 const CredentialCard: React.FC<CredentialCardProps> = ({
@@ -33,10 +35,11 @@ const CredentialCard: React.FC<CredentialCardProps> = ({
   existsInWallet,
   style = {},
   onPress = undefined,
+  cardStyle = {},
 }) => {
-  // add ability to reference credential by ID, allows us to get past react hook restrictions
-  const { OCABundleResolver } = useConfiguration()
-  const { ColorPallet } = useTheme()
+  const { OCABundleResolver } = useConfiguration();
+  const { ColorPallet } = useTheme();
+
   const getCredOverlayType = (type: CardOverlayType) => {
     if (proof) {
       return (
@@ -50,15 +53,15 @@ const CredentialCard: React.FC<CredentialCardProps> = ({
           credential={credential}
           proof
           elevated
-        ></CredentialCard11>
-      )
+        />
+      );
     }
 
     if (credential) {
       if (type === CardOverlayType.CardLayout10) {
-        return <CredentialCard10 credential={credential as CredentialExchangeRecord} style={style} onPress={onPress} />
+        return <CredentialCard10 credential={credential as CredentialExchangeRecord} style={style} onPress={onPress} />;
       } else {
-        return <CredentialCard11 credential={credential as CredentialExchangeRecord} style={style} onPress={onPress} />
+        return <CredentialCard11 credential={credential as CredentialExchangeRecord} style={style} onPress={onPress} />;
       }
     } else {
       return (
@@ -70,10 +73,11 @@ const CredentialCard: React.FC<CredentialCardProps> = ({
           style={style}
           onPress={onPress}
         />
-      )
+      );
     }
-  }
-  return getCredOverlayType(OCABundleResolver.cardOverlayType)
-}
+  };
 
-export default CredentialCard
+  return getCredOverlayType(OCABundleResolver.cardOverlayType);
+};
+
+export default CredentialCard;

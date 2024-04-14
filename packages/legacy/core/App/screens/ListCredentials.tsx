@@ -32,7 +32,7 @@ const ListCredentials: React.FC = () => {
             <View
               style={{
                 marginHorizontal: 15,
-                marginTop: 15,
+                marginTop: 7,
                 marginBottom: index === credentials.length - 1 ? 45 : 0,
               }}
             >

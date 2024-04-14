@@ -2,7 +2,7 @@ import { CredentialExchangeRecord } from '@aries-framework/core'
 import startCase from 'lodash.startcase'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, Dimensions, Image, ImageBackground, StyleSheet, Text, View, ViewStyle } from 'react-native'
+import { FlatList, Dimensions, Image, StyleSheet, Text, View, ViewStyle } from 'react-native'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 
@@ -15,6 +15,7 @@ import { Attribute, Predicate } from '../../types/record'
 import { credentialTextColor, getCredentialIdentifiers, toImageSource } from '../../utils/credential'
 import { getCredentialConnectionLabel, isDataUrl } from '../../utils/helpers'
 import { testIdWithKey } from '../../utils/testable'
+import Svg, { Defs, Rect, LinearGradient, Stop } from 'react-native-svg';
 
 import CardWatermark from './CardWatermark'
 
@@ -31,6 +32,7 @@ interface CredentialCard11Props {
   schemaId?: string
   proof?: boolean
   containerWidth?: number
+  cardStyle?: ViewStyle
 }
 
 const { width } = Dimensions.get('screen')
@@ -38,35 +40,6 @@ const { width } = Dimensions.get('screen')
 const borderRadius = 10
 const padding = width * 0.05
 const logoHeight = width * 0.12
-
-/*
-  A card is defined as a nx8 (height/rows x width/columns) grid.
-  | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
-  | 2 |   |   |   |   |   |   |   |
-  | 3 |   |   |   |   |   |   |   |
-  | 4 |   |   |   |   |   |   |   |
-  ...
-
-  The card width is the full screen width.
-
-  Secondary Body (1):
-  Primary Body   (2): Small Logo (1x1) -> L (shifted left by 50%)
-                      Issuer Name (1x6)
-                      Credential Name (1x6)
-                      Primary Attribute 1 (1x6)
-                      Primary Attribute 2 (1x6)
-  Status         (3): Icon (1x1) -> S
-
-   (1)            (2)           (3)
-  | L | Issuer Name            | S |
-  |   | Credential Name        |   |
-  |   |                        |   |
-  |   | Primary Attribute 1    |   |
-  |   | Primary Attribute 2    |   |
-  ...
-
-  Note: The small logo MUST be provided as 1x1 (height/width) ratio.
- */
 
 const CredentialCard11: React.FC<CredentialCard11Props> = ({
   credential,
@@ -79,6 +52,7 @@ const CredentialCard11: React.FC<CredentialCard11Props> = ({
   credDefId,
   schemaId,
   proof,
+  cardStyle = {},
 }) => {
   const { i18n, t } = useTranslation()
   const { ColorPallet, TextTheme, ListItems } = useTheme()
@@ -100,34 +74,31 @@ const CredentialCard11: React.FC<CredentialCard11Props> = ({
 
   const cardData = [...(displayItems ?? []), primaryField, secondaryField]
 
-  const getSecondaryBackgroundColor = () => {
-    if (proof) {
-      return overlay.cardLayoutOverlay?.primaryBackgroundColor
-    } else {
-      return overlay.cardLayoutOverlay?.backgroundImageSlice?.src
-        ? 'rgba(0, 0, 0, 0)'
-        : overlay.cardLayoutOverlay?.secondaryBackgroundColor
-    }
-  }
-
   const [dimensions, setDimensions] = useState({ cardWidth: 0, cardHeight: 0 })
 
   const styles = StyleSheet.create({
     container: {
-      backgroundColor: '#a77202', // Set background color to orange
-      borderRadius: 10, // Match the border radius of the message container
-      width: 370, // Set width to 350
+      width: 370,
       height: 200,
       marginBottom: 20,
+      overflow: 'hidden',
+      borderRadius: 10,
+      backgroundColor: 'rgba(212, 91, 20, 0.5)',
+      position: 'relative',
+    },
+    gradientContainer: {
+      position: 'absolute',
+      left: 0,
+      top: 0,
+      right: 0,
+      bottom: 0,
+    },
+    gradient: {
+      flex: 1,
+      borderRadius: 10,
     },
     cardContainer: {
       flexDirection: 'row',
-    },
-    secondaryBodyContainer: {
-      width: logoHeight,
-      borderTopLeftRadius: borderRadius,
-      borderBottomLeftRadius: borderRadius,
-      backgroundColor: getSecondaryBackgroundColor() ?? overlay.cardLayoutOverlay?.primaryBackgroundColor,
     },
     primaryBodyContainer: {
       flexGrow: 1,
@@ -147,22 +118,6 @@ const CredentialCard11: React.FC<CredentialCard11Props> = ({
       width: logoHeight,
       justifyContent: 'center',
       alignItems: 'center',
-    },
-    logoContainer: {
-      top: padding,
-      left: -1 * logoHeight + padding,
-      width: logoHeight,
-      height: logoHeight,
-      backgroundColor: '#ffffff',
-      borderRadius: 8,
-      justifyContent: 'center',
-      alignItems: 'center',
-      shadowColor: '#000',
-      shadowOffset: {
-        width: 1,
-        height: 1,
-      },
-      shadowOpacity: 0.3,
     },
     headerText: {
       ...TextTheme.labelSubtitle,
@@ -219,42 +174,6 @@ const CredentialCard11: React.FC<CredentialCard11Props> = ({
     setIsRevoked(credential?.revocationNotification !== undefined && !proof)
     setIsProofRevoked(credential?.revocationNotification !== undefined && !!proof)
   }, [credential?.revocationNotification])
-
-  const CredentialCardLogo: React.FC = () => {
-    return (
-      <View style={[styles.logoContainer, { elevation: elevated ? 5 : 0 }]}>
-        {overlay.cardLayoutOverlay?.logo?.src ? (
-          <Image
-            source={toImageSource(overlay.cardLayoutOverlay?.logo.src)}
-            style={{
-              resizeMode: 'cover',
-              width: logoHeight,
-              height: logoHeight,
-              borderRadius: 8,
-            }}
-          />
-        ) : (
-          <Text
-            style={[
-              TextTheme.normal,
-              {
-                fontSize: 0.5 * logoHeight,
-                fontWeight: 'bold',
-                alignSelf: 'center',
-                color: '#000',
-              },
-            ]}
-          >
-            {!error ? (
-              (overlay.metaOverlay?.name ?? overlay.metaOverlay?.issuerName ?? 'C')?.charAt(0).toUpperCase()
-            ) : (
-              <Icon name={'warning'} size={30} style={styles.errorIcon} />
-            )}
-          </Text>
-        )}
-      </View>
-    )
-  }
 
   const AttributeLabel: React.FC<{ label: string }> = ({ label }) => {
     return (
@@ -332,7 +251,7 @@ const CredentialCard11: React.FC<CredentialCard11Props> = ({
         <View style={{ marginLeft: -1 * logoHeight + padding, margin: -1 }}>
           <View>
             {!(overlay.metaOverlay?.issuerName === 'Unknown Contact' && proof) && (
-              <View style={{ flexDirection: 'row' }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Text
                   testID={testIdWithKey('CredentialIssuer')}
                   style={[
@@ -343,6 +262,10 @@ const CredentialCard11: React.FC<CredentialCard11Props> = ({
                       opacity: 0.8,
                       flex: 1,
                       flexWrap: 'wrap',
+                      textAlign: 'right', // Align text to the right
+                      alignItems: 'center', // Vertically center the text
+                      marginTop: 25, // Add margin from the top for vertical centering
+                      marginRight: -30,
                     },
                   ]}
                 >
@@ -350,7 +273,8 @@ const CredentialCard11: React.FC<CredentialCard11Props> = ({
                 </Text>
               </View>
             )}
-            <View style={{ flexDirection: 'row' }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginTop: 5 }}>
+              {/* Aligning headerText and valueText to the right */}
               <Text
                 testID={testIdWithKey('CredentialName')}
                 style={[
@@ -361,6 +285,9 @@ const CredentialCard11: React.FC<CredentialCard11Props> = ({
                     lineHeight: 24,
                     flex: 1,
                     flexWrap: 'wrap',
+                    textAlign: 'right', // Align text to the right
+                    alignItems: 'center', // Vertically center the text
+                    marginRight: -30,
                   },
                 ]}
               >
@@ -369,9 +296,9 @@ const CredentialCard11: React.FC<CredentialCard11Props> = ({
             </View>
           </View>
           {(error || isProofRevoked) && (
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', marginTop: 5 }}>
+              {/* Aligning errorText to the right */}
               <Icon style={[styles.errorIcon]} name="close" size={30} />
-
               <Text style={[styles.errorText]} testID={testIdWithKey('RevokedOrNotAvailable')} numberOfLines={1}>
                 {error ? t('ProofRequest.NotAvailableInYourWallet') : t('CredentialDetails.Revoked')}
               </Text>
@@ -385,51 +312,6 @@ const CredentialCard11: React.FC<CredentialCard11Props> = ({
             }}
           />
         </View>
-      </View>
-    )
-  }
-
-  const CredentialCardSecondaryBody: React.FC = () => {
-    return (
-      <View
-        testID={testIdWithKey('CredentialCardSecondaryBody')}
-        style={[
-          styles.secondaryBodyContainer,
-          {
-            backgroundColor:
-              error || isProofRevoked
-                ? ColorPallet.notification.errorBorder
-                : styles.secondaryBodyContainer.backgroundColor,
-          },
-        ]}
-      >
-        {overlay.cardLayoutOverlay?.backgroundImageSlice?.src && !displayItems ? (
-          <ImageBackground
-            source={toImageSource(overlay.cardLayoutOverlay?.backgroundImageSlice.src)}
-            style={{ flexGrow: 1 }}
-            imageStyle={{
-              borderTopLeftRadius: borderRadius,
-              borderBottomLeftRadius: borderRadius,
-            }}
-          >
-            {null}
-          </ImageBackground>
-        ) : (
-          !(error || proof || getSecondaryBackgroundColor()) && (
-            <View
-              style={[
-                {
-                  position: 'absolute',
-                  width: logoHeight,
-                  height: '100%',
-                  borderTopLeftRadius: borderRadius,
-                  borderBottomLeftRadius: borderRadius,
-                  backgroundColor: 'rgba(0,0,0,0.24)',
-                },
-              ]}
-            ></View>
-          )
-        )}
       </View>
     )
   }
@@ -481,13 +363,12 @@ const CredentialCard11: React.FC<CredentialCard11Props> = ({
           })
         }
       >
-        <CredentialCardSecondaryBody />
-        <CredentialCardLogo />
         <CredentialCardPrimaryBody />
         <CredentialCardStatus status={status} />
       </View>
     )
   }
+
   return overlay.bundle ? (
     <View
       style={[styles.container, style, { elevation: elevated ? 5 : 0, overflow: 'hidden' }]}
@@ -495,6 +376,16 @@ const CredentialCard11: React.FC<CredentialCard11Props> = ({
         setDimensions({ cardHeight: event.nativeEvent.layout.height, cardWidth: event.nativeEvent.layout.width })
       }}
     >
+   <View style={styles.gradientContainer}>
+  <View style={styles.gradient}>
+    <View style={{ flex: 1, backgroundColor: '#ad2c04' }} />
+    <View style={{ flex: 1, backgroundColor: '#b14a13' }} />
+    <View style={{ flex: 1, backgroundColor: '#b76822' }} />
+    <View style={{ flex: 1, backgroundColor: '#bb862f' }} />
+    <View style={{ flex: 1, backgroundColor: '#c0a33d' }} />
+  </View>
+</View>
+
       <TouchableOpacity
         accessible={false}
         accessibilityLabel={typeof onPress === 'undefined' ? undefined : t('Credentials.CredentialDetails')}

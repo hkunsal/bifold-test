@@ -24,7 +24,7 @@ const HomeStack: React.FC = () => {
         options={() => ({
           title: t('Screens.Home'),
           headerRight: () => null,
-          headerLeft: () => null,
+          headerLeft: () => <SettingsMenu />,
         })}
       />
       <Stack.Screen

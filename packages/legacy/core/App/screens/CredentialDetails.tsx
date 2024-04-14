@@ -74,13 +74,12 @@ const CredentialDetails: React.FC<CredentialDetailsProps> = ({ navigation, route
     secondaryHeaderContainer: {
       height: 1.5 * logoHeight,
       backgroundColor:
-        (overlay.cardLayoutOverlay?.backgroundImage?.src
-          ? 'rgba(0, 0, 0, 0)'
-          : overlay.cardLayoutOverlay?.primaryBackgroundColor) ?? 'rgba(0, 0, 0, 0.24)',
+      '#b14a13',
     },
     primaryHeaderContainer: {
       paddingHorizontal,
       paddingVertical,
+      backgroundColor: 'transparent',
     },
     statusContainer: {
       backgroundColor: ColorPallet.brand.primaryBackground,
@@ -329,7 +328,7 @@ const CredentialDetails: React.FC<CredentialDetailsProps> = ({ navigation, route
         {credentialConnectionLabel ? (
           <View
             style={{
-              backgroundColor: ColorPallet.brand.primaryBackground,
+              backgroundColor: '#b76822',
               marginTop: paddingVertical,
               paddingHorizontal,
               paddingVertical,
