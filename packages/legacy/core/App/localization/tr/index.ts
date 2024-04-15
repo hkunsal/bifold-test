@@ -346,7 +346,7 @@ const translation = {
   },
   "CredentialOffer": {
     "CredentialOffer": "Credential Offer",
-    "ThisIsTakingLongerThanExpected": "This is taking Longer than expected. Check back later for your new credential.",
+    "ThisIsTakingLongerThanExpected": "İşlem beklenenden uzun sürüyor. Dilerseniz kimliğinizi daha sonra kontrol edebilirsiniz.",
     "RejectThisCredential?": "Reject this Credential?",
     "AcceptingCredential": "Accepting Credential",
     "SuccessfullyAcceptedCredential": "Successfully Accepted Credential",
@@ -453,7 +453,7 @@ const translation = {
   },
 
   "ConnectionLoading": {
-    "BuildingID": "Kimliğiniz oluşturuluyor."
+    "BuildingID": "Kimliğiniz oluşturuluyor..."
   },
 
   "Screens": {

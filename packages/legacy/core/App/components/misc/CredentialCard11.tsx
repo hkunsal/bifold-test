@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next'
 import { FlatList, Dimensions, Image, StyleSheet, Text, View, ViewStyle } from 'react-native'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import Icon from 'react-native-vector-icons/MaterialIcons'
+import Person from '../../assets/icons/person.svg'
+import Notes from '../../assets/icons/notes.svg'
 
 import { useConfiguration } from '../../contexts/configuration'
 import { useTheme } from '../../contexts/theme'
@@ -82,21 +84,11 @@ const CredentialCard11: React.FC<CredentialCard11Props> = ({
       height: 200,
       marginBottom: 20,
       overflow: 'hidden',
-      borderRadius: 10,
-      backgroundColor: 'rgba(212, 91, 20, 0.5)',
+      borderRadius: 20,
+      backgroundColor: '#d2610f',
       position: 'relative',
     },
-    gradientContainer: {
-      position: 'absolute',
-      left: 0,
-      top: 0,
-      right: 0,
-      bottom: 0,
-    },
-    gradient: {
-      flex: 1,
-      borderRadius: 10,
-    },
+
     cardContainer: {
       flexDirection: 'row',
     },
@@ -248,73 +240,43 @@ const CredentialCard11: React.FC<CredentialCard11Props> = ({
   const CredentialCardPrimaryBody: React.FC = () => {
     return (
       <View testID={testIdWithKey('CredentialCardPrimaryBody')} style={styles.primaryBodyContainer}>
-        <View style={{ marginLeft: -1 * logoHeight + padding, margin: -1 }}>
-          <View>
-            {!(overlay.metaOverlay?.issuerName === 'Unknown Contact' && proof) && (
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text
-                  testID={testIdWithKey('CredentialIssuer')}
-                  style={[
-                    TextTheme.label,
-                    styles.textContainer,
-                    {
-                      lineHeight: 19,
-                      opacity: 0.8,
-                      flex: 1,
-                      flexWrap: 'wrap',
-                      textAlign: 'right', // Align text to the right
-                      alignItems: 'center', // Vertically center the text
-                      marginTop: 25, // Add margin from the top for vertical centering
-                      marginRight: -30,
-                    },
-                  ]}
-                >
-                  {overlay.metaOverlay?.issuerName}
-                </Text>
-              </View>
-            )}
-            <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', marginTop: 5 }}>
-              {/* Aligning headerText and valueText to the right */}
-              <Text
-                testID={testIdWithKey('CredentialName')}
-                style={[
-                  TextTheme.normal,
-                  styles.textContainer,
-                  {
-                    fontWeight: 'bold',
-                    lineHeight: 24,
-                    flex: 1,
-                    flexWrap: 'wrap',
-                    textAlign: 'right', // Align text to the right
-                    alignItems: 'center', // Vertically center the text
-                    marginRight: -30,
-                  },
-                ]}
-              >
-                {overlay.metaOverlay?.name}
-              </Text>
-            </View>
-          </View>
-          {(error || isProofRevoked) && (
-            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', marginTop: 5 }}>
-              {/* Aligning errorText to the right */}
-              <Icon style={[styles.errorIcon]} name="close" size={30} />
-              <Text style={[styles.errorText]} testID={testIdWithKey('RevokedOrNotAvailable')} numberOfLines={1}>
-                {error ? t('ProofRequest.NotAvailableInYourWallet') : t('CredentialDetails.Revoked')}
-              </Text>
-            </View>
-          )}
-          <FlatList
-            data={cardData}
-            scrollEnabled={false}
-            renderItem={({ item }) => {
-              return renderCardAttribute(item as Attribute & Predicate)
-            }}
-          />
+        <Text
+          testID={testIdWithKey('CredentialName')}
+          style={[
+            TextTheme.normal,
+            styles.textContainer,
+            {
+              fontWeight: 'bold',
+              lineHeight: 24,
+              textAlign: 'left',
+              marginTop: -10,
+            },
+          ]}
+        >
+          {overlay.metaOverlay?.name}
+        </Text>
+        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center',  marginLeft: 40, marginBottom: 40, }}>
+          <Person width={90} height={110} fill="white" />
+          <Notes width={90} height={110} fill="white" />
         </View>
+        {(error || isProofRevoked) && (
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', marginTop: 5 }}>
+            <Icon style={[styles.errorIcon]} name="close" size={30} />
+            <Text style={[styles.errorText]} testID={testIdWithKey('RevokedOrNotAvailable')} numberOfLines={1}>
+              {error ? t('ProofRequest.NotAvailableInYourWallet') : t('CredentialDetails.Revoked')}
+            </Text>
+          </View>
+        )}
+        <FlatList
+          data={cardData}
+          scrollEnabled={false}
+          renderItem={({ item }) => {
+            return renderCardAttribute(item as Attribute & Predicate)
+          }}
+        />
       </View>
     )
-  }
+  }  
 
   const CredentialCardStatus: React.FC<{ status?: CredentialStatus }> = ({ status }) => {
     const Status: React.FC<{ status?: CredentialStatus }> = ({ status }) => {
@@ -363,6 +325,7 @@ const CredentialCard11: React.FC<CredentialCard11Props> = ({
           })
         }
       >
+    
         <CredentialCardPrimaryBody />
         <CredentialCardStatus status={status} />
       </View>
@@ -376,15 +339,6 @@ const CredentialCard11: React.FC<CredentialCard11Props> = ({
         setDimensions({ cardHeight: event.nativeEvent.layout.height, cardWidth: event.nativeEvent.layout.width })
       }}
     >
-   <View style={styles.gradientContainer}>
-  <View style={styles.gradient}>
-    <View style={{ flex: 1, backgroundColor: '#ad2c04' }} />
-    <View style={{ flex: 1, backgroundColor: '#b14a13' }} />
-    <View style={{ flex: 1, backgroundColor: '#b76822' }} />
-    <View style={{ flex: 1, backgroundColor: '#bb862f' }} />
-    <View style={{ flex: 1, backgroundColor: '#c0a33d' }} />
-  </View>
-</View>
 
       <TouchableOpacity
         accessible={false}

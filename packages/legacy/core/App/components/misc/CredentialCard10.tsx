@@ -79,9 +79,9 @@ const CredentialCard10: React.FC<CredentialCard10Props> = ({ credential, style =
 
   const styles = StyleSheet.create({
     container: {
-      backgroundColor: '#d45b14', // Set background color to orange
-      borderRadius: 10, // Match the border radius of the message container
-      width: 370, // Match the width of the message container
+      backgroundColor: '#d45b14', 
+      borderRadius: 20, 
+      width: 370, 
       padding: 20,
       marginBottom: 20,
     },

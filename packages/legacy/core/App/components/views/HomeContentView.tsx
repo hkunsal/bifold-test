@@ -9,7 +9,7 @@ import EmptyWalletIcon from '../../assets/img/empty-wallet.svg';
 import { borderRadius } from 'theme';
 
 const SWIPE_THRESHOLD = 100;
-const CARD_OFFSET = 30;
+const CARD_OFFSET = 40;
 const { width: screenWidth } = Dimensions.get('window');
 
 const HomeContentView = () => {
@@ -74,21 +74,18 @@ const HomeContentView = () => {
   let yOffset;
 
   if (credentials.length === 1) {
-    // Single card, allow it to respond to swiping if active
-    yOffset = -40;
+    yOffset = 40;
   } else if (credentials.length === 2) {
-    // Two cards: ensure correct positioning and responsiveness
     if (index === 0) {
-      yOffset = isActive ? pan.y : -40;  // First card directly at the empty container's position
+      yOffset = isActive ? pan.y : -50;  
     } else if (index === 1){
-      yOffset = isActive ? pan.y -20 : -40;  // Second card correctly positioned just below the first
+      yOffset = isActive ? pan.y -20 : -50;  
     }
   } else {
-    // Three or more cards
     if (index <= 2) {
       yOffset = isActive ? pan.y : -CARD_OFFSET * (index - currentIndex);
     } else {
-      yOffset = -CARD_OFFSET * 2; // Stack all cards beyond the third one on top of the third card
+      yOffset = -CARD_OFFSET * 2; 
     }
   }
 
@@ -113,7 +110,7 @@ const HomeContentView = () => {
   );
 };
 
-const BORDER_PADDING = 24; // Padding on each side
+const BORDER_PADDING = 24; 
 
 const styles = StyleSheet.create({
   container: {
@@ -125,7 +122,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     width: '100%',
     marginBottom: 20,
-    paddingLeft: 20, // Adjust margin left
+    paddingLeft: 20, 
   },
   cardContainer: {
     width: '100%',
@@ -142,13 +139,13 @@ const styles = StyleSheet.create({
     fontSize: 20,
     marginBottom: 24,
     marginTop: 10,
-    textAlign: 'left', // Align text to the left
+    textAlign: 'left', 
   },
   aboveBoxText: {
     fontWeight: "bold",
-    marginTop: 10,
+    marginTop: 20,
     marginBottom: 80,
-    textAlign: 'left', // Align text to the left
+    textAlign: 'left', 
   },
   emptyContainer: {
     flexDirection: 'row',
@@ -158,8 +155,8 @@ const styles = StyleSheet.create({
     height: 200,
     borderColor: '#D3D3D3',
     borderWidth: 1,
-    borderRadius: 10,
-    marginTop: -40,  // Adjust to align with the backmost card
+    borderRadius: 20,
+    marginTop: -50,  
     padding: 40,
   },
   emptyWalletText: {
@@ -168,10 +165,10 @@ const styles = StyleSheet.create({
   },
   headerBorder: {
     height: 1,
-    width: screenWidth - 2 * BORDER_PADDING, // Adjusted width calculation
+    width: screenWidth - 2 * BORDER_PADDING, 
     backgroundColor: '#D3D3D3',
     marginBottom: 10,
-    alignSelf: 'center', // Ensures the border is centered after adjusting the width
+    alignSelf: 'center', 
     marginLeft: BORDER_PADDING - 34,
     marginRight: BORDER_PADDING - 12
   },

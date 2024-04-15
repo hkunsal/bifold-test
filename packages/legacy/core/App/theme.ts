@@ -15,6 +15,10 @@ import Logo from './assets/img/logo.svg'
 import ProofRequestDeclined from './assets/img/proof-declined.svg'
 import InterfaceRafiki from './assets/img/interface-rafiki.svg'
 import InterfaceAmico from './assets/img/interface-amico.svg'
+import Person from './assets/icons/person.svg'
+import Notes from './assets/icons/notes.svg'
+
+import { PresentationPreview } from '@aries-framework/core'
 
 export interface ISVGAssets {
   appLockout: React.FC<SvgProps>
@@ -250,7 +254,7 @@ export const TextTheme: ITextTheme = {
     color: ColorPallet.brand.text,
   },
   normal: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'normal',
     color: ColorPallet.grayscale.black,
   },
@@ -800,6 +804,8 @@ export const Assets = {
     arrow: Arrow,
     interfaceRafiki: InterfaceRafiki,
     interfaceAmico: InterfaceAmico,
+    person: Person,
+    notes: Notes,
   },
   img: {
     logoPrimary: {
